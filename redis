@@ -18,3 +18,7 @@ daemonize no        -->   daemonize yes
 
 按照配置文件启动命令
 /data/redis-5.0.0/src/redis-server /data/redis-5.0.0/redis.conf
+
+关闭redis
+/data/redis-5.0.0/src/redis-cli
+SHUTDOWN
