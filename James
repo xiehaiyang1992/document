@@ -1,0 +1,41 @@
+单机版本邮件服务器
+
+前提：已经安装好jdk，关闭防火墙
+
+JAMES搭建
+wget http://archive.apache.org/dist/james/server/3.2.0/james-server-app-3.2.0-app.zip -P /data
+unzip /data/james-server-app-3.2.0-app.zip -d /data/
+
+vi /data/james-server-app-3.2.0/conf/domainlist.xml			
+<defaultDomain>localhost</defaultDomain>	-->		<defaultDomain>ubuntu.xiehaiyang.club</defaultDomain>
+
+/data/james-server-app-3.2.0/bin/james start
+
+创建3个用户（用户名或密码建议6位，太短不行）
+/data/james-server-app-3.2.0/bin/james-cli.sh AddUser aaaaaa@ubuntu.xiehaiyang.club 000000
+/data/james-server-app-3.2.0/bin/james-cli.sh AddUser bbbbbb@ubuntu.xiehaiyang.club 000000
+/data/james-server-app-3.2.0/bin/james-cli.sh AddUser cccccc@ubuntu.xiehaiyang.club 000000
+
+HUPA搭建（邮箱的页面）
+wget http://mirror.bit.edu.cn/apache/tomcat/tomcat-9/v9.0.13/bin/apache-tomcat-9.0.13.tar.gz -P /data
+tar -zxvf /data/apache-tomcat-9.0.13.tar.gz  -C /data/
+wget http://central.maven.org/maven2/org/apache/james/hupa/hupa/0.0.3/hupa-0.0.3.war -P /data/apache-tomcat-9.0.13/webapps/
+unzip /data/apache-tomcat-9.0.13/webapps/hupa-0.0.3.war -d /data/apache-tomcat-9.0.13/webapps/hupa
+rm /data/apache-tomcat-9.0.13/webapps/hupa-0.0.3.war
+
+vi /data/apache-tomcat-9.0.13/webapps/hupa/WEB-INF/conf/config.properties
+IMAPServerAddress=imap.gmail.com			--> 	IMAPServerAddress=0.0.0.0
+SMTPServerAddress=smtp.gmail.com			-->		SMTPServerAddress=0.0.0.0
+IMAPServerPort=993		-->		IMAPServerPort=143
+SMTPServerPort=465		-->		SMTPServerPort=25
+IMAPS=true				-->		IMAPS=false
+SMTPS=true				-->		SMTPS=false
+
+
+/data/apache-tomcat-9.0.13/bin/startup.sh
+
+
+http://ubuntu.xiehaiyang.club:8080/hupa/
+使用用户登录
+aaaaaa@ubuntu.xiehaiyang.club 
+000000
