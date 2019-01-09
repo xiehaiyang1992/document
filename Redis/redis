@@ -1,0 +1,24 @@
+安装redis5.0的步骤
+yum install -y make gcc wget
+mkdir /data
+cd /data
+wget http://download.redis.io/releases/redis-5.0.0.tar.gz
+tar -zxvf redis-5.0.0.tar.gz
+cd redis-5.0.0
+make MALLOC=libc
+
+安装完以后修改配置文件/data/redis-5.0.0/redis.conf
+开启远程模式
+bind 127.0.0.1      -->   #bind 127.0.0.1
+protected-mode yes  -->   protected-mode no
+开启后台模式
+daemonize no        -->   daemonize yes
+配置密码
+# requirepass foobared    -->   requirepass haiyang
+
+按照配置文件启动命令
+/data/redis-5.0.0/src/redis-server /data/redis-5.0.0/redis.conf
+
+关闭redis
+/data/redis-5.0.0/src/redis-cli
+SHUTDOWN

@@ -1,0 +1,91 @@
+https://blog.csdn.net/xcj_20160810/article/details/79805150
+=======================================================================
+实验目的
+db1的users不分表
+db2，db3的item表根据路由做分表分库处理
+=======================================================================
+建立表
+DROP DATABASE IF EXISTS db1; 
+DROP DATABASE IF EXISTS db2;
+DROP DATABASE IF EXISTS db3;
+CREATE DATABASE db1; 
+USE db1;
+ CREATE TABLE users (  
+    id INT NOT NULL AUTO_INCREMENT,  
+    NAME VARCHAR(50) NOT NULL DEFAULT '',  
+    indate DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',  
+    PRIMARY KEY (id)  
+)AUTO_INCREMENT= 1 ENGINE=INNODB DEFAULT CHARSET=utf8;  
+
+CREATE DATABASE db2; 
+USE db2; 
+ CREATE TABLE item (  
+    id INT NOT NULL AUTO_INCREMENT,  
+    VALUE VARCHAR(50) NOT NULL DEFAULT 0,  
+    indate DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',  
+    PRIMARY KEY (id)  
+)AUTO_INCREMENT= 1 ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+CREATE DATABASE db3;  
+USE db3;
+CREATE TABLE item (  
+    id INT NOT NULL AUTO_INCREMENT,  
+    VALUE VARCHAR(50) NOT NULL DEFAULT 0,  
+    indate DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',  
+    PRIMARY KEY (id)  
+)AUTO_INCREMENT= 1 ENGINE=INNODB DEFAULT CHARSET=utf8; 
+=======================================================================
+•然后在conf目录下编辑service.xml，rule.xml，schema.xml三个文件。
+•service.xml主要配置mycat服务的参数，比如端口号，myact用户名和密码使用的逻辑数据库等
+•role.xml主要配置路由策略，主要有分片的片键，拆分的策略（取模还是按区间划分等）
+•schema.xml文件主要配置数据库的信息，例如逻辑数据库名称，物理上真实的数据源以及表和数据源之间的对应关系和路由策略等。
+=======================================================================
+service.xml把注释服务器的注释打开就好，默认用户是root/123456,端口8066
+<property name="serverPort">8066</property>
+=======================================================================
+role.xml一般就看看，有空去mycat官网看文档都有的
+<tableRule name="sharding-by-murmur">里面的murmur是规则的意思，下面有具体实现
+=======================================================================
+schema.xml很多要改的，要根据以上的两个文件改动
+<schema name="TESTDB" checkSQLschema="false" sqlMaxLimit="100">这是数据库表的配置，是虚拟表
+把没用的删除再添加
+<table name="users" primaryKey="id"  dataNode="dn1" />  
+<table name="item" primaryKey="id" dataNode="dn2,dn3" rule="sharding-by-murmur" />
+<dataNode>填写具体数据库名字
+<dataHost>是配置物理数据库的位置，修改内容如下
+
+	<schema name="TESTDB" checkSQLschema="false" sqlMaxLimit="100">
+	<table name="users" primaryKey="id"  dataNode="dn1" />  
+	<table name="item" primaryKey="id" dataNode="dn2,dn3" rule="sharding-by-murmur" />
+	</schema>
+	<dataNode name="dn1" dataHost="localhost1" database="db1" />
+	<dataNode name="dn2" dataHost="localhost1" database="db2" />
+	<dataNode name="dn3" dataHost="localhost1" database="db3" />
+	<dataHost name="localhost1" maxCon="1000" minCon="10" balance="0"
+			  writeType="0" dbType="mysql" dbDriver="native" switchType="1"  slaveThreshold="100">
+		<heartbeat>select user()</heartbeat>
+		<writeHost host="hostS1" url="localhost:3306" user="root"
+				   password="" />
+		<!-- <writeHost host="hostM2" url="localhost:3316" user="root" password="123456"/> -->
+	</dataHost>
+=======================================================================
+测试物理数据库连接3306端口root/，mycat数据库连接8066端口root/123456
+SHOW DATABASES;
+SHOW TABLES;
+
+INSERT INTO users(id,`name`) VALUE(1,'users');
+INSERT INTO users(id,`name`) VALUE(2,'users');
+INSERT INTO users(id,`name`) VALUE(3,'users');
+INSERT INTO users(id,`name`) VALUE(4,'users');
+INSERT INTO users(id,`name`) VALUE(5,'users');
+INSERT INTO users(id,`name`) VALUE(6,'users');
+ 
+INSERT INTO item(id,`value`) VALUE(1,'item');
+INSERT INTO item(id,`value`) VALUE(2,'item');
+INSERT INTO item(id,`value`) VALUE(3,'item');
+INSERT INTO item(id,`value`) VALUE(4,'item');
+INSERT INTO item(id,`value`) VALUE(5,'item');
+INSERT INTO item(id,`value`) VALUE(6,'item');
+
+SELECT * FROM users ORDER BY id;
+SELECT * FROM item ORDER BY id;

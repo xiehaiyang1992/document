@@ -1,0 +1,51 @@
+https://www.cnblogs.com/alvin_xp/p/4162249.html
+windows：
+https://blog.csdn.net/crazycoder2010/article/details/22228205 
+
+=============================================================================
+主服务器：3310 my.ini
+[mysqld]
+server-id=1
+port = 3310
+log-bin=master-bin
+log-bin-index=master-bin.index
+sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+
+[client]
+port = 3310 
+
+=============================================================================
+从服务器：3311-3319 my.ini
+[mysqld]
+server-id=2
+port = 3311
+relay-log = slave-relay-bin
+relay-log-index = slave-relay-bin.index
+sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+
+[client]
+port = 3311 
+
+=============================================================================
+主机SQL语句
+create user repl_user;
+grant replication slave on *.* to repl_user@'localhost' identified by '111111';
+FLUSH PRIVILEGES;
+从机SQL语句
+CHANGE MASTER TO MASTER_HOST='localhost',MASTER_PORT=3310,MASTER_USER='repl_user',MASTER_PASSWORD='111111';
+START SLAVE;
+SHOW SLAVE STATUS;
+==============================================================================
+测试
+CREATE USER 'haiyang'@'%' IDENTIFIED BY 'haiyang';
+GRANT ALL PRIVILEGES ON *.* TO 'haiyang'@'%' IDENTIFIED BY 'haiyang';
+FLUSH PRIVILEGES;
+
+DROP DATABASE  IF  EXISTS haiyang ;
+CREATE DATABASE haiyang;
+USE haiyang;
+CREATE TABLE haiyangtable(
+id INT,
+`name` VARCHAR(20)
+);
+INSERT INTO haiyang.haiyangtable VALUE(1,'haiyang');

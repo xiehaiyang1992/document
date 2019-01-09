@@ -1,0 +1,46 @@
+单机版本邮件服务器
+
+=====前提：已经安装好jdk1.8，关闭防火墙（或者打开端口25，110，143）。
+=====域名IP:e.xiehaiyang.club，并设置
+=====因为涉及到1000以下的端口，只能使用管理员才能开启服务
+
+JAMES搭建
+wget http://archive.apache.org/dist/james/server/3.2.0/james-server-app-3.2.0-app.zip -P /data
+unzip /data/james-server-app-3.2.0-app.zip -d /data/
+
+vim /data/james-server-app-3.2.0/conf/domainlist.xml			
+<defaultDomain>localhost</defaultDomain>	-->		<defaultDomain>e.xiehaiyang.club</defaultDomain>
+
+/data/james-server-app-3.2.0/bin/james start
+
+创建3个用户（用户名或密码建议6位，太短不行）
+/data/james-server-app-3.2.0/bin/james-cli.sh AddUser 0@e.xiehaiyang.club 0
+/data/james-server-app-3.2.0/bin/james-cli.sh AddUser 1@e.xiehaiyang.club 1
+/data/james-server-app-3.2.0/bin/james-cli.sh AddUser 2@e.xiehaiyang.club 2
+
+HUPA搭建（邮箱的页面）
+wget http://mirror.bit.edu.cn/apache/tomcat/tomcat-9/v9.0.13/bin/apache-tomcat-9.0.13.tar.gz -P /data
+tar -zxvf /data/apache-tomcat-9.0.13.tar.gz  -C /data/
+wget http://central.maven.org/maven2/org/apache/james/hupa/hupa/0.0.3/hupa-0.0.3.war -P /data/apache-tomcat-9.0.13/webapps/
+unzip /data/apache-tomcat-9.0.13/webapps/hupa-0.0.3.war -d /data/apache-tomcat-9.0.13/webapps/hupa
+rm /data/apache-tomcat-9.0.13/webapps/hupa-0.0.3.war
+
+vim /data/apache-tomcat-9.0.13/webapps/hupa/WEB-INF/conf/config.properties
+IMAPServerAddress=imap.gmail.com		--> 	IMAPServerAddress=0.0.0.0
+SMTPServerAddress=smtp.gmail.com		-->		SMTPServerAddress=0.0.0.0
+IMAPServerPort=993		-->		IMAPServerPort=143
+SMTPServerPort=465		-->		SMTPServerPort=25
+IMAPS=true				-->		IMAPS=false
+SMTPS=true				-->		SMTPS=false 
+
+/data/apache-tomcat-9.0.13/bin/startup.sh
+
+
+http://e.xiehaiyang.club:8080/hupa/
+使用用户登录
+0@e.xiehaiyang.club/0
+1@e.xiehaiyang.club/1
+2@e.xiehaiyang.club/2
+
+注：腾讯云的买服务器是无法telnet到其他服务器的25端口，但是可以使用腾讯云实验室的服务器做实验
+注：james2.2版本不支持lmtp协议，所以不能使用hupa；james3.2可以使用hupa
