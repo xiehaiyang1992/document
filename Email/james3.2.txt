@@ -10,6 +10,7 @@ unzip /data/james-server-app-3.2.0-app.zip -d /data/
 
 vim /data/james-server-app-3.2.0/conf/domainlist.xml			
 <defaultDomain>localhost</defaultDomain>	-->		<defaultDomain>e.xiehaiyang.club</defaultDomain>
+另外需要 #vi /etc/hosts 将 127.0.0.1 xiehaiyang.club 添加
 
 /data/james-server-app-3.2.0/bin/james start
 
